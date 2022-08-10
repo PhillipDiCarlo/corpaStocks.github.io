@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "mysql": "^2.18.1",
+    "tedious": "^15.0.1",
+    "tmi.js": "^1.8.5"
+  }
+}
