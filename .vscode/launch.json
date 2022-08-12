@@ -5,13 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "name": "nodemon",
+            "program": "${workspaceFolder}/server.js",
             "request": "launch",
-            "name": "Launch Program",
+            "restart": true,
+            "runtimeExecutable": "nodemon",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${file}"
+            "type": "node"
         }
     ]
 }
