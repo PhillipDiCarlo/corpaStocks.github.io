@@ -1,7 +1,6 @@
 console.log("Twitch Bot Starting");
 
 //Requirements
-require("dotenv").config();
 //require("tedious");
 const tmi = require("tmi.js");
 var HashMap = require("hashmap");
@@ -42,6 +41,7 @@ async function getCorpa(client, channelName) {
   const finalItem = item.stockPrice;
   return finalItem;
 }
+console.log("TWITCH BOT PSWD:", process.env.TWITCH_OAUTH_TOKEN);
 
 const twitchClient = new tmi.Client({
   options: { debug: true },
@@ -125,34 +125,10 @@ twitchClient.on("message", (channel, tags, message, self) => {
       );
     });
   }
-
-  // // debugger;
-  // if (message === "!dbg") {
-  //   var streamerName = channel.toString().toLowerCase().substring(1);
-  //   netWorthMap.set(
-  //     channel.toString().substring(1),
-  //     netWorthMap.get(channel.toString().substring(1)) + 0.01
-  //   );
-  // }
-
-  insertCorpa(
-    new MongoClient(
-      process.env.MONGO_URL.concat(channel.toString().substring(1))
-    ),
-    streamerName,
-    {
-      channelId: channel,
-      stockName: "$".concat(channel.toString().substring(1)),
-      stockPrice: netWorthMap.get(channel.toString().substring(1)),
-      timestamp: new Date().toISOString(),
-    }
-  );
 });
 
-async function main() {
+module.exports = async function () {
   //netWorthMap.set("<channelName>", <ipoNumber>);
   await setNetworth("italiandogs");
   console.log(netWorthMap.get("italiandogs"));
-}
-
-main();
+};

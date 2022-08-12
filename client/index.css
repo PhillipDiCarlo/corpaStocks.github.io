@@ -1,0 +1,46 @@
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  color: #fff;
+  line-height: 1.5;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: rgba(30, 30, 30);
+  width: 100vw;
+  height: 100vh;
+}
+
+iframe {
+  overflow: hidden;
+  width: 85%;
+  flex-grow: 1;
+  border-radius: 1.25rem;
+  background: #21313c;
+  border: none;
+  box-shadow: -5px 6px 1em 0 rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+  
+}
+
+iframe:hover {
+  box-shadow: -10px 10px 2em 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+canvas {
+  z-index: 1;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
