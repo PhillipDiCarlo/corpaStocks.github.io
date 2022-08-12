@@ -126,27 +126,27 @@ twitchClient.on("message", (channel, tags, message, self) => {
     });
   }
 
-  //debugger
+  // // debugger;
   // if (message === "!dbg") {
   //   var streamerName = channel.toString().toLowerCase().substring(1);
   //   netWorthMap.set(
   //     channel.toString().substring(1),
   //     netWorthMap.get(channel.toString().substring(1)) + 0.01
   //   );
-
-  //   insertCorpa(
-  //     new MongoClient(
-  //       process.env.MONGO_URL.concat(channel.toString().substring(1))
-  //     ),
-  //     streamerName,
-  //     {
-  //       channelId: channel,
-  //       stockName: "$".concat(channel.toString().substring(1)),
-  //       stockPrice: netWorthMap.get(channel.toString().substring(1)),
-  //       timestamp: new Date().toISOString(),
-  //     }
-  //   );
   // }
+
+  insertCorpa(
+    new MongoClient(
+      process.env.MONGO_URL.concat(channel.toString().substring(1))
+    ),
+    streamerName,
+    {
+      channelId: channel,
+      stockName: "$".concat(channel.toString().substring(1)),
+      stockPrice: netWorthMap.get(channel.toString().substring(1)),
+      timestamp: new Date().toISOString(),
+    }
+  );
 });
 
 async function main() {
