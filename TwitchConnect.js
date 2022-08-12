@@ -78,7 +78,8 @@ twitchClient.on("message", (channel, tags, message, self) => {
         channelId: channel,
         stockName: "$".concat(channel.toString().substring(1)),
         stockPrice: netWorthMap.get(channel.toString().substring(1)),
-        timestamp: new Date().toISOString(),
+        //timestamp: new Date().toISOString(),
+        timestamp: Math.round(Date.now() / 1000),
       }
     );
   }
@@ -102,7 +103,8 @@ twitchClient.on("message", (channel, tags, message, self) => {
         channelId: channel,
         stockName: "$".concat(channel.toString().substring(1)),
         stockPrice: netWorthMap.get(channel.toString().substring(1)),
-        timestamp: new Date().toISOString(),
+        //timestamp: new Date().toISOString(),
+        timestamp: Math.round(Date.now() / 1000),
       }
     );
   }
@@ -125,26 +127,26 @@ twitchClient.on("message", (channel, tags, message, self) => {
   }
 
   //debugger
-  if (message === "!dbg") {
-    var streamerName = channel.toString().toLowerCase().substring(1);
-    netWorthMap.set(
-      channel.toString().substring(1),
-      netWorthMap.get(channel.toString().substring(1)) + 0.01
-    );
+  // if (message === "!dbg") {
+  //   var streamerName = channel.toString().toLowerCase().substring(1);
+  //   netWorthMap.set(
+  //     channel.toString().substring(1),
+  //     netWorthMap.get(channel.toString().substring(1)) + 0.01
+  //   );
 
-    insertCorpa(
-      new MongoClient(
-        process.env.MONGO_URL.concat(channel.toString().substring(1))
-      ),
-      streamerName,
-      {
-        channelId: channel,
-        stockName: "$".concat(channel.toString().substring(1)),
-        stockPrice: netWorthMap.get(channel.toString().substring(1)),
-        timestamp: new Date().toISOString(),
-      }
-    );
-  }
+  //   insertCorpa(
+  //     new MongoClient(
+  //       process.env.MONGO_URL.concat(channel.toString().substring(1))
+  //     ),
+  //     streamerName,
+  //     {
+  //       channelId: channel,
+  //       stockName: "$".concat(channel.toString().substring(1)),
+  //       stockPrice: netWorthMap.get(channel.toString().substring(1)),
+  //       timestamp: new Date().toISOString(),
+  //     }
+  //   );
+  // }
 });
 
 async function main() {
