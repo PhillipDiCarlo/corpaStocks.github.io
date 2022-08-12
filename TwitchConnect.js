@@ -148,11 +148,9 @@ twitchClient.on("message", (channel, tags, message, self) => {
 });
 
 async function main() {
-  netWorthMap.set("mizkif", 231731);
-  netWorthMap.set("italiandogs", 22);
-
-  // await setNetworth("italiandogs");
-  // console.log(netWorthMap.get("italiandogs"));
+  //netWorthMap.set("<channelName>", <ipoNumber>);
+  await setNetworth("italiandogs");
+  console.log(netWorthMap.get("italiandogs"));
 }
 
 main();
