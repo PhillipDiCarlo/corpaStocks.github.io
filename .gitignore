@@ -62,3 +62,6 @@ dist
 
 #node_modules
 /node_modules
+
+#vsCode files
+/.vscode
