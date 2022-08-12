@@ -41,7 +41,6 @@ async function getCorpa(client, channelName) {
   const finalItem = item.stockPrice;
   return finalItem;
 }
-console.log("TWITCH BOT PSWD:", process.env.TWITCH_OAUTH_TOKEN);
 
 const twitchClient = new tmi.Client({
   options: { debug: true },
