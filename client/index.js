@@ -7,10 +7,10 @@ var ctx = peepee.getContext("2d");
 let corpa = document.createElement("img");
 corpa.src = "https://cdn.7tv.app/emote/612a803421ca87d781a04fd2/4x";
 
-var lois = new Howl({
-  src: ["https://jimmyboy.sfo3.cdn.digitaloceanspaces.com/sounds/lois.mp3"],
-  html5: true,
-});
+// var lois = new Howl({
+//   src: ["https://jimmyboy.sfo3.cdn.digitaloceanspaces.com/sounds/lois.mp3"],
+//   html5: true,
+// });
 
 // ctx.fillStyle = "black";
 
@@ -55,22 +55,22 @@ function draw(time) {
   if (y > peepee.height - 128) {
     vy = -vy;
     y = peepee.height - 128;
-    if (Math.random() > CHANCE) lois.play();
+    //if (Math.random() > CHANCE) lois.play();
   }
   if (y < 0) {
     vy = -vy;
     y = 0;
-    if (Math.random() > CHANCE) lois.play();
+    //if (Math.random() > CHANCE) lois.play();
   }
   if (x > peepee.width - 128) {
     vx = -vx;
     x = peepee.width - 128;
-    if (Math.random() > 0.5) lois.play();
+    //if (Math.random() > 0.5) lois.play();
   }
   if (x < 0) {
     vx = -vx;
     x = 0;
-    if (Math.random() > CHANCE) lois.play();
+    //if (Math.random() > CHANCE) lois.play();
   }
   window.requestAnimationFrame(draw);
 }
