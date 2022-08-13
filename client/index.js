@@ -40,41 +40,41 @@ const CHANCE = 0.05;
 /**
  * @type {FrameRequestCallback}
  */
-function draw(time) {
-  clear(false);
-  dt = time - prevTime;
-  prevTime = time;
-  ctx.fillStyle = "white";
-  ctx.strokeStyle = "white";
+// function draw(time) {
+//   clear(false);
+//   dt = time - prevTime;
+//   prevTime = time;
+//   ctx.fillStyle = "white";
+//   ctx.strokeStyle = "white";
 
-  ctx.drawImage(corpa, x, y, 128, 128);
+//   ctx.drawImage(corpa, x, y, 128, 128);
 
-  x += vx * dt;
-  y += vy * dt;
+//   x += vx * dt;
+//   y += vy * dt;
 
-  if (y > peepee.height - 128) {
-    vy = -vy;
-    y = peepee.height - 128;
-    //if (Math.random() > CHANCE) lois.play();
-  }
-  if (y < 0) {
-    vy = -vy;
-    y = 0;
-    //if (Math.random() > CHANCE) lois.play();
-  }
-  if (x > peepee.width - 128) {
-    vx = -vx;
-    x = peepee.width - 128;
-    //if (Math.random() > 0.5) lois.play();
-  }
-  if (x < 0) {
-    vx = -vx;
-    x = 0;
-    //if (Math.random() > CHANCE) lois.play();
-  }
-  window.requestAnimationFrame(draw);
-}
-Howler.volume(0.5);
+//   if (y > peepee.height - 128) {
+//     vy = -vy;
+//     y = peepee.height - 128;
+//     //if (Math.random() > CHANCE) lois.play();
+//   }
+//   if (y < 0) {
+//     vy = -vy;
+//     y = 0;
+//     //if (Math.random() > CHANCE) lois.play();
+//   }
+//   if (x > peepee.width - 128) {
+//     vx = -vx;
+//     x = peepee.width - 128;
+//     //if (Math.random() > 0.5) lois.play();
+//   }
+//   if (x < 0) {
+//     vx = -vx;
+//     x = 0;
+//     //if (Math.random() > CHANCE) lois.play();
+//   }
+//   window.requestAnimationFrame(draw);
+// }
+// Howler.volume(0.5);
 window.requestAnimationFrame(draw);
 
 document.body.appendChild(peepee);
