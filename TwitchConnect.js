@@ -1,17 +1,15 @@
-console.log("Twitch Bot Starting");
+console.info("Twitch Bot Starting");
 
 //Requirements
-//require("tedious");
 const tmi = require("tmi.js");
 var HashMap = require("hashmap");
+const { networkInterfaces } = require("os");
 
 //MongoDB connection
 var MongoClient = require("mongodb").MongoClient;
 var databaseName = "streamerStocks";
-var collectionName; // TODO
+var collectionName;
 var netWorthMap = new HashMap();
-
-//Networth formula: in env file
 
 //initial set of streamers worth if collection exists
 async function setNetworth(streamer) {
@@ -19,8 +17,6 @@ async function setNetworth(streamer) {
   await getCorpa(clientName, streamer).then((tempIPO) => {
     netWorthMap.set(streamer, tempIPO);
   });
-
-  //console.log(netWorthMap.get("italiandogs"));
 }
 
 async function insertCorpa(client, streamerName, newInsert) {
@@ -28,7 +24,15 @@ async function insertCorpa(client, streamerName, newInsert) {
     .db(databaseName)
     .collection(streamerName)
     .insertOne(newInsert);
-  console.log("document inserted");
+  console.info("document inserted for: ".concat(streamerName));
+}
+
+async function initialIPO(client, streamerName, newInsert) {
+  const result = await client
+    .db(databaseName)
+    .collection(streamerName)
+    .insertOne(newInsert);
+  console.info("IPO Created for: ".concat(streamerName));
 }
 
 //get stonk price
@@ -127,7 +131,28 @@ twitchClient.on("message", (channel, tags, message, self) => {
 });
 
 module.exports = async function () {
-  //netWorthMap.set("<channelName>", <ipoNumber>);
   await setNetworth("italiandogs");
-  console.log(netWorthMap.get("italiandogs"));
+  await setNetworth("mizkif");
+  // console.log(netWorthMap.get("italiandogs"));
+
+  // //____________________________________________________________
+  // //initial IPO of streamer (keep commented out unless needed)
+  // //Networth formula: in env file
+
+  // var stremerToAdd = "test";
+  // var ipoAmount = 69420;
+
+  // netWorthMap.set(stremerToAdd, ipoAmount);
+  // await initialIPO(
+  //   new MongoClient(process.env.MONGO_URL.concat(stremerToAdd)),
+  //   stremerToAdd,
+  //   {
+  //     channelId: stremerToAdd,
+  //     stockName: "$".concat(stremerToAdd),
+  //     stockPrice: ipoAmount,
+  //     //timestamp: new Date().toISOString(),
+  //     timestamp: Math.round(Date.now() / 1000),
+  //   }
+  // );
+  // //___________________________________________________________
 };
