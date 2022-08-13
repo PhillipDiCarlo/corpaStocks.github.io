@@ -64,8 +64,8 @@ twitchClient.on("message", (channel, tags, message, self) => {
 
   //Sell Stonks
   if (
-    message.toLowerCase() === "corpa sell" ||
-    message.toLowerCase() === "sell corpa"
+    message.toLowerCase().includes("corpa sell") ||
+    message.toLowerCase().includes("sell corpa")
   ) {
     var streamerName = channel.toString().toLowerCase().substring(1);
     netWorthMap.set(
@@ -89,8 +89,8 @@ twitchClient.on("message", (channel, tags, message, self) => {
 
   //Buy Stonks
   if (
-    message.toLowerCase() === "corpa buy" ||
-    message.toLowerCase() === "buy corpa"
+    message.toLowerCase().includes("corpa buy") ||
+    message.toLowerCase().includes("buy corpa")
   ) {
     var streamerName = channel.toString().toLowerCase().substring(1);
     netWorthMap.set(
@@ -113,7 +113,7 @@ twitchClient.on("message", (channel, tags, message, self) => {
   }
 
   //Check Streamer Value
-  if (message.toLowerCase() === "!corpastonk") {
+  if (message.toLowerCase().includes("!corpastonk")) {
     var clientName = new MongoClient(
       process.env.MONGO_URL.concat(channel.toString().substring(1))
     );
@@ -124,7 +124,7 @@ twitchClient.on("message", (channel, tags, message, self) => {
         `@${tags.username} $${channel
           .toString()
           .substring(1)
-          .toUpperCase()} is worth ${corpaCost.toFixed(2)}`
+          .toUpperCase()} is worth ${corpaCost.toFixed(2).concat(" Corpas")}`
       );
     });
   }
