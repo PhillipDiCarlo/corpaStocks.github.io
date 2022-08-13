@@ -4,8 +4,8 @@ peepee.width = window.innerWidth;
 peepee.height = window.innerHeight;
 
 var ctx = peepee.getContext("2d");
-let corpa = document.createElement("img");
-corpa.src = "https://cdn.7tv.app/emote/612a803421ca87d781a04fd2/4x";
+// let corpa = document.createElement("img");
+// corpa.src = "https://cdn.7tv.app/emote/612a803421ca87d781a04fd2/4x";
 
 // var lois = new Howl({
 //   src: ["https://jimmyboy.sfo3.cdn.digitaloceanspaces.com/sounds/lois.mp3"],
