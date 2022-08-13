@@ -4,17 +4,31 @@
     <link rel="stylesheet" href="client/index.css"></link>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.core.min.js" integrity="sha512-+wqa4/aOL4vwhL637A4p+6epqhUHDqpEfYJa1+PlzlMf908CSOb3xtIeKwZWh5Q0Q/R2nYUKxH4vvcQg+k8KKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
     <title>Corpa Stonks</title>
   </head>
+  
   <body >
       <div id="root"><header>
         <h1>CORPA STONK</h1>
         <p>Created by: Italiandogs</p>
         <p>Shows the corpa value of your most favorite streamers!</p>
+        <p>In-chat commands:</p>
+        <li>!CorpaStonk: Show streamer's Corpa Worth in chat</li>
+        <li>Corpa Buy/Buy Corpa: Adds to streamer's corpa value</li>
+        <li>Corpa Sell/Sell Corpa: Adds to streamer's corpa value</li>
       </header>
 
-      <iframe  
-        src="https://charts.mongodb.com/charts-project-0-hnvzf/embed/charts?id=62f6057d-1114-49f0-8acf-3d313f9479e8&maxDataAge=300&theme=dark&autoRefresh=true"></iframe></div>
-        <script src="client/index.js"></script>
+      <!-- <form name="change"> -->
+        <SELECT NAME="options" ONCHANGE="document.getElementById('youriframe').src = this.options[this.selectedIndex].value">
+          <option value="https://cdn.7tv.app/emote/612a803421ca87d781a04fd2/4x">Choose Streamer</option>
+          <option value="https://charts.mongodb.com/charts-project-0-hnvzf/embed/charts?id=62f6057d-1114-49f0-8acf-3d313f9479e8&maxDataAge=300&theme=dark&autoRefresh=true">Italiandogs</option>
+          <option value="https://charts.mongodb.com/charts-project-0-hnvzf/embed/charts?id=62f70683-5ed6-4bc5-8682-067068e01e21&maxDataAge=60&theme=dark&autoRefresh=true">Mizkif</option>
+          
+        </SELECT>
         
+        <iframe name="iframe" id="youriframe" src="https://cdn.7tv.app/emote/612a803421ca87d781a04fd2/4x"></iframe>
+
+      </div>
+        <script src="client/index.js"></script>   
   </body>
