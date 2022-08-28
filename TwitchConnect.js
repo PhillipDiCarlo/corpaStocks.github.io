@@ -5,8 +5,6 @@ const tmi = require("tmi.js");
 var HashMap = require("hashmap");
 const { networkInterfaces } = require("os");
 
-const keywords = ["corpa buy", "buy corpa", "corpa sell", "sell corpa"];
-
 //MongoDB connection
 var MongoClient = require("mongodb").MongoClient;
 var databaseName = "streamerStocks";
@@ -21,18 +19,12 @@ async function setNetworth(streamer) {
   });
 }
 
-async function insertCorpa(channel) {
-  const mongo = new MongoClient(process.env.MONGO_URL.concat(channel));
-  const result = await mongo
+async function insertCorpa(client, streamerName, newInsert) {
+  const result = await client
     .db(databaseName)
-    .collection(channel)
-    .insertOne({
-      channelId: "#".concat(channel),
-      stockName: "$".concat(channel),
-      stockPrice: netWorthMap.get(channel),
-      //timestamp: new Date().toISOString(),
-      timestamp: Math.round(Date.now() / 1000),
-    });
+    .collection(streamerName)
+    .insertOne(newInsert);
+  console.info("document inserted for: ".concat(streamerName));
 }
 
 async function initialIPO(client, streamerName, newInsert) {
@@ -61,7 +53,7 @@ const twitchClient = new tmi.Client({
     password: process.env.TWITCH_OAUTH_TOKEN,
   },
   // Channels to watch
-  channels: ["Italiandogs"], //TODO Potentially move to database
+  channels: ["Italiandogs", "mizkif"],
 });
 
 twitchClient.connect();
@@ -70,18 +62,58 @@ twitchClient.on("message", (channel, tags, message, self) => {
   // Ignore echoed messages.
   if (self) return;
 
-  // Add/Sub corpa value
-  if (keywords.includes(message.toLowerCase())) {
+  //Sell Stonks
+  if (
+    message.toLowerCase().includes("corpa sell") ||
+    message.toLowerCase().includes("sell corpa")
+  ) {
     var streamerName = channel.toString().toLowerCase().substring(1);
-    var buySell;
-    if (message.toLowerCase().includes("sell")) buySell = -0.01;
-    else if (message.toLowerCase().includes("buy")) buySell = 0.01;
-    updateNetworthMap(streamerName, buySell);
-    insertCorpa(streamerName);
+    netWorthMap.set(
+      channel.toString().substring(1),
+      netWorthMap.get(channel.toString().substring(1)) - 0.01
+    );
+    insertCorpa(
+      new MongoClient(
+        process.env.MONGO_URL.concat(channel.toString().substring(1))
+      ),
+      streamerName,
+      {
+        channelId: channel,
+        stockName: "$".concat(channel.toString().substring(1)),
+        stockPrice: netWorthMap.get(channel.toString().substring(1)),
+        //timestamp: new Date().toISOString(),
+        timestamp: Math.round(Date.now() / 1000),
+      }
+    );
+  }
+
+  //Buy Stonks
+  if (
+    message.toLowerCase().includes("corpa buy") ||
+    message.toLowerCase().includes("buy corpa")
+  ) {
+    var streamerName = channel.toString().toLowerCase().substring(1);
+    netWorthMap.set(
+      channel.toString().substring(1),
+      netWorthMap.get(channel.toString().substring(1)) + 0.01
+    );
+    insertCorpa(
+      new MongoClient(
+        process.env.MONGO_URL.concat(channel.toString().substring(1))
+      ),
+      streamerName,
+      {
+        channelId: channel,
+        stockName: "$".concat(channel.toString().substring(1)),
+        stockPrice: netWorthMap.get(channel.toString().substring(1)),
+        //timestamp: new Date().toISOString(),
+        timestamp: Math.round(Date.now() / 1000),
+      }
+    );
   }
 
   //Check Streamer Value
-  if (message.toLowerCase().includes("!corpastock")) {
+  if (message.toLowerCase().includes("!corpastonk")) {
     var clientName = new MongoClient(
       process.env.MONGO_URL.concat(channel.toString().substring(1))
     );
@@ -89,17 +121,14 @@ twitchClient.on("message", (channel, tags, message, self) => {
     getCorpa(clientName, channelName).then((corpaCost) => {
       twitchClient.say(
         channel,
-        `@${tags.username} $${channelName.toUpperCase()} is worth ${corpaCost
-          .toFixed(2)
-          .concat(" Corpas")}`
+        `@${tags.username} $${channel
+          .toString()
+          .substring(1)
+          .toUpperCase()} is worth ${corpaCost.toFixed(2).concat(" Corpas")}`
       );
     });
   }
 });
-
-function updateNetworthMap(channel, amount) {
-  netWorthMap.set(channel, netWorthMap.get(channel) + amount); //TODO
-}
 
 module.exports = async function () {
   await setNetworth("italiandogs");
