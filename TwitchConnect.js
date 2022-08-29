@@ -62,7 +62,7 @@ const twitchClient = new tmi.Client({
     password: process.env.TWITCH_OAUTH_TOKEN,
   },
   // Channels to watch
-  channels: ["Italiandogs"], //TODO Potentially move to database
+  channels: ["Italiandogs", "mizkif"], //TODO Potentially move to database
 });
 
 twitchClient.connect();
