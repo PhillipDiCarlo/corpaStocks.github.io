@@ -5,7 +5,8 @@ const tmi = require("tmi.js");
 var HashMap = require("hashmap");
 const { networkInterfaces } = require("os");
 
-const keywords = ["corpa buy", "buy corpa", "corpa sell", "sell corpa"];
+const buyKeywords = ["corpa buy", "buy corpa"];
+const sellKeywords = ["corpa sell", "sell corpa"];
 
 //MongoDB connection
 var MongoClient = require("mongodb").MongoClient;
@@ -15,8 +16,7 @@ var netWorthMap = new HashMap();
 
 //initial set of streamers worth if collection exists
 async function setNetworth(streamer) {
-  var clientName = new MongoClient(process.env.MONGO_URL.concat(streamer));
-  await getCorpa(clientName, streamer).then((tempIPO) => {
+  await getCorpa(streamer).then((tempIPO) => {
     netWorthMap.set(streamer, tempIPO);
   });
 }
@@ -44,7 +44,8 @@ async function initialIPO(client, streamerName, newInsert) {
 }
 
 //get stonk price
-async function getCorpa(client, channelName) {
+async function getCorpa(channelName) {
+  var client = new MongoClient(process.env.MONGO_URL.concat(channelName));
   client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(channelName);
@@ -61,7 +62,7 @@ const twitchClient = new tmi.Client({
     password: process.env.TWITCH_OAUTH_TOKEN,
   },
   // Channels to watch
-  channels: ["Italiandogs"], //TODO Potentially move to database
+  channels: ["Italiandogs", "mizkif"], //TODO Potentially move to database
 });
 
 twitchClient.connect();
@@ -70,13 +71,17 @@ twitchClient.on("message", (channel, tags, message, self) => {
   // Ignore echoed messages.
   if (self) return;
 
-  // Add/Sub corpa value
-  if (keywords.includes(message.toLowerCase())) {
+  // Add Corpa Value
+  if (buyKeywords.includes(message.toLowerCase())) {
     var streamerName = channel.toString().toLowerCase().substring(1);
-    var buySell;
-    if (message.toLowerCase().includes("sell")) buySell = -0.01;
-    else if (message.toLowerCase().includes("buy")) buySell = 0.01;
-    updateNetworthMap(streamerName, buySell);
+    updateNetworthMap(streamerName, 0.01);
+    insertCorpa(streamerName);
+  }
+
+  // Sub Corpa Value
+  if (sellKeywords.includes(message.toLowerCase())) {
+    var streamerName = channel.toString().toLowerCase().substring(1);
+    updateNetworthMap(streamerName, -0.01);
     insertCorpa(streamerName);
   }
 
@@ -86,7 +91,7 @@ twitchClient.on("message", (channel, tags, message, self) => {
       process.env.MONGO_URL.concat(channel.toString().substring(1))
     );
     var channelName = channel.toString().substring(1);
-    getCorpa(clientName, channelName).then((corpaCost) => {
+    getCorpa(channelName).then((corpaCost) => {
       twitchClient.say(
         channel,
         `@${tags.username} $${channelName.toUpperCase()} is worth ${corpaCost
