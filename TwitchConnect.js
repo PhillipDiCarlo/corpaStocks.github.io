@@ -2,17 +2,19 @@ console.info("Twitch Bot Starting");
 
 //Requirements
 const tmi = require("tmi.js");
-var HashMap = require("hashmap");
+let HashMap = require("hashmap");
 const { networkInterfaces } = require("os");
 
 const buyKeywords = ["corpa buy", "buy corpa"];
 const sellKeywords = ["corpa sell", "sell corpa"];
+let numberOfStreamers;
+
+let channels2Watch = new HashMap();
 
 //MongoDB connection
-var MongoClient = require("mongodb").MongoClient;
-var databaseName = "streamerStocks";
-var collectionName;
-var netWorthMap = new HashMap();
+let MongoClient = require("mongodb").MongoClient;
+let databaseName = "streamerStocks";
+let netWorthMap = new HashMap();
 
 //initial set of streamers worth if collection exists
 async function setNetworth(streamer) {
@@ -21,6 +23,7 @@ async function setNetworth(streamer) {
   });
 }
 
+// Add entry into corresponding database collection
 async function insertCorpa(channel) {
   const mongo = new MongoClient(process.env.MONGO_URL.concat(channel));
   const result = await mongo
@@ -35,17 +38,17 @@ async function insertCorpa(channel) {
     });
 }
 
-async function initialIPO(client, streamerName, newInsert) {
-  const result = await client
-    .db(databaseName)
-    .collection(streamerName)
-    .insertOne(newInsert);
-  console.info("IPO Created for: ".concat(streamerName));
+// New Streamer? Adds to databases
+async function addNewStreamer() {
+  // TODO - Add streamer to 'streamerList'
+  // TODO - Create new collection for streamer
+  // TODO = Determine IPO value via followers
+  // TODO - Join twitch chat
 }
 
 //get stonk price
 async function getCorpa(channelName) {
-  var client = new MongoClient(process.env.MONGO_URL.concat(channelName));
+  let client = new MongoClient(process.env.MONGO_URL.concat(channelName));
   client.connect();
   const db = client.db(databaseName);
   const collection = db.collection(channelName);
@@ -56,13 +59,13 @@ async function getCorpa(channelName) {
 }
 
 const twitchClient = new tmi.Client({
-  options: { debug: true },
+  options: { debug: true, joinInterval: 300 },
   identity: {
     username: process.env.TWITCH_BOT_USERNAME,
     password: process.env.TWITCH_OAUTH_TOKEN,
   },
   // Channels to watch
-  channels: ["Italiandogs", "mizkif"], //TODO Potentially move to database
+  channels: [],
 });
 
 twitchClient.connect();
@@ -73,24 +76,24 @@ twitchClient.on("message", (channel, tags, message, self) => {
 
   // Add Corpa Value
   if (buyKeywords.includes(message.toLowerCase())) {
-    var streamerName = channel.toString().toLowerCase().substring(1);
+    let streamerName = channel.toString().toLowerCase().substring(1);
     updateNetworthMap(streamerName, 0.01);
     insertCorpa(streamerName);
   }
 
   // Sub Corpa Value
   if (sellKeywords.includes(message.toLowerCase())) {
-    var streamerName = channel.toString().toLowerCase().substring(1);
+    let streamerName = channel.toString().toLowerCase().substring(1);
     updateNetworthMap(streamerName, -0.01);
     insertCorpa(streamerName);
   }
 
   //Check Streamer Value
   if (message.toLowerCase().includes("!corpastock")) {
-    var clientName = new MongoClient(
+    let clientName = new MongoClient(
       process.env.MONGO_URL.concat(channel.toString().substring(1))
     );
-    var channelName = channel.toString().substring(1);
+    let channelName = channel.toString().substring(1);
     getCorpa(channelName).then((corpaCost) => {
       twitchClient.say(
         channel,
@@ -103,12 +106,51 @@ twitchClient.on("message", (channel, tags, message, self) => {
 });
 
 function updateNetworthMap(channel, amount) {
-  netWorthMap.set(channel, netWorthMap.get(channel) + amount); //TODO
+  netWorthMap.set(channel, netWorthMap.get(channel) + amount);
+}
+async function joinChannels() {
+  for (let x = 0; x < channels2Watch.size; x++) {
+    twitchClient.join(channels2Watch.get(x));
+  }
+  console.info("Joined all streamer's Chats");
+}
+
+async function getClientAmount() {
+  let client = new MongoClient(process.env.MONGO_URL.concat("streamerList"));
+  client.connect();
+
+  const db = client.db(databaseName);
+  const collection = db.collection("streamerList");
+  const cursor = collection.find().sort("EntryNumber", -1).limit(1);
+  const item = await cursor.next();
+  numberOfStreamers = item.EntryNumber;
+}
+
+async function initializeHashMap() {
+  let client = new MongoClient(process.env.MONGO_URL.concat("streamerList"));
+  client.connect();
+  const db = client.db(databaseName);
+  const collection = db.collection("streamerList");
+  const cursor = collection.find().sort("EntryNumber");
+
+  for (let x = 0; x < numberOfStreamers; x++) {
+    let item = await cursor.next();
+    if (item.isActive === false) {
+      // TODO - Add isActive to document
+      continue;
+    }
+    channels2Watch.set(x, item.streamerName);
+  }
+  console.info("Streamer HashMap Initialized");
 }
 
 module.exports = async function () {
   await setNetworth("italiandogs");
   await setNetworth("mizkif");
+  await getClientAmount();
+  await initializeHashMap();
+  await joinChannels();
+
   // console.log(netWorthMap.get("italiandogs"));
 
   // //____________________________________________________________
