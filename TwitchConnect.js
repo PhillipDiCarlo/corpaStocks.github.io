@@ -4,6 +4,8 @@ console.info("Twitch Bot Starting");
 const tmi = require("tmi.js");
 let HashMap = require("hashmap");
 const { networkInterfaces } = require("os");
+// const request = require("request");
+// const cheerio = require("cheerio");
 
 const buyKeywords = ["corpa buy", "buy corpa"];
 const sellKeywords = ["corpa sell", "sell corpa"];
@@ -39,7 +41,7 @@ async function insertCorpa(channel) {
 }
 
 // New Streamer? Adds to databases
-async function addNewStreamer() {
+async function addNewStreamer(channel, followerCount) {
   // TODO - Add streamer to 'streamerList'
   // TODO - Create new collection for streamer
   // TODO = Determine IPO value via followers
@@ -65,7 +67,7 @@ const twitchClient = new tmi.Client({
     password: process.env.TWITCH_OAUTH_TOKEN,
   },
   // Channels to watch
-  channels: [],
+  channels: ["corpastocks"],
 });
 
 twitchClient.connect();
@@ -103,7 +105,31 @@ twitchClient.on("message", (channel, tags, message, self) => {
       );
     });
   }
+
+  // Listen for new user wanting to be added
+  if (
+    channel.toString().substring(1) === "corpastocks" &&
+    message.toLowerCase() === "!addme"
+  ) {
+    getFollowerAmount(tags.username);
+    twitchClient.say(channel, "you wanna be added?");
+  }
 });
+
+// TODO - Maybe not needed. Might want to get
+// followers via webpage to push info into database -> tumer to
+// update hashmap and join commands here
+function getFollowerAmount(twitchUsername) {
+  request(
+    "https://twitchtracker.com/".concat(twitchClient),
+    (error, response, html) => {
+      console.log(html);
+      if (!error && response.statusCode == 200) {
+        console.log(html);
+      }
+    }
+  );
+}
 
 function updateNetworthMap(channel, amount) {
   netWorthMap.set(channel, netWorthMap.get(channel) + amount);
