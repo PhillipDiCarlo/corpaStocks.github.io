@@ -4,8 +4,8 @@ console.info("Twitch Bot Starting");
 const tmi = require("tmi.js");
 let HashMap = require("hashmap");
 const { networkInterfaces } = require("os");
-// const request = require("request");
-// const cheerio = require("cheerio");
+const request = require("request");
+const cheerio = require("cheerio");
 
 const buyKeywords = ["corpa buy", "buy corpa"];
 const sellKeywords = ["corpa sell", "sell corpa"];
@@ -42,10 +42,63 @@ async function insertCorpa(channel) {
 
 // New Streamer? Adds to databases
 async function addNewStreamer(channel, followerCount) {
-  // TODO - Add streamer to 'streamerList'
-  // TODO - Create new collection for streamer
-  // TODO = Determine IPO value via followers
-  // TODO - Join twitch chat
+  if (streamerExists(channel)) {
+    twitchClient.say(
+      "#corpaStocks",
+      `@${channel}! You already exist in the matrix`
+    );
+    return;
+  }
+  // Adds streamer to 'streamerList'
+  await addStreamerList(channel);
+  // Determines IPO value via followers
+  let ipoValue = await determinIPOValue(followerCount);
+  // Creates new collection for streamer
+  await createCollection(channel);
+  await initialIPO(channel, ipoValue);
+  // Joins twitch chat
+  twitchClient.join(channel);
+  twitchClient.say("#corpaStocks", `@${channel}! Congrats! You've been added`);
+}
+
+async function initialIPO(channel, ipoValue) {
+  const mongo = new MongoClient(process.env.MONGO_URL.concat(channel));
+  const result = await mongo
+    .db(databaseName)
+    .collection(channel)
+    .insertOne({
+      channelId: "#".concat(channel),
+      stockName: "$".concat(channel),
+      stockPrice: ipoValue,
+      //timestamp: new Date().toISOString(),
+      timestamp: Math.round(Date.now() / 1000),
+    });
+}
+//Create a new collection in the document
+async function createCollection(channel) {
+  const mongo = new MongoClient(process.env.MONGO_URL.concat("streamerList"));
+  const result = await mongo.db(databaseName).createCollection(channel);
+}
+
+async function determinIPOValue(followerCount) {
+  return Math.pow(Math.sqrt(followerCount) / 3, 2) + 3;
+}
+
+// Adds user to streamerList DB
+async function addStreamerList(channel) {
+  numberOfStreamers++;
+
+  const mongo = new MongoClient(process.env.MONGO_URL.concat("streamerList"));
+  const result = await mongo
+    .db(databaseName)
+    .collection("streamerList")
+    .insertOne({
+      EntryNumber: numberOfStreamers,
+      streamerName: channel,
+    });
+
+  //Adds streamer to hashMap
+  channels2Watch.set(numberOfStreamers - 1, channel);
 }
 
 //get stonk price
@@ -71,66 +124,91 @@ const twitchClient = new tmi.Client({
 });
 
 twitchClient.connect();
+async function twitchChat() {
+  twitchClient.on("message", (channel, tags, message, self) => {
+    // Ignore echoed messages.
+    if (self) return;
 
-twitchClient.on("message", (channel, tags, message, self) => {
-  // Ignore echoed messages.
-  if (self) return;
+    // Add Corpa Value
+    if (buyKeywords.includes(message.toLowerCase())) {
+      let streamerName = channel.toString().toLowerCase().substring(1);
+      updateNetworthMap(streamerName, 0.01);
+      insertCorpa(streamerName);
+    }
 
-  // Add Corpa Value
-  if (buyKeywords.includes(message.toLowerCase())) {
-    let streamerName = channel.toString().toLowerCase().substring(1);
-    updateNetworthMap(streamerName, 0.01);
-    insertCorpa(streamerName);
-  }
+    // Sub Corpa Value
+    if (sellKeywords.includes(message.toLowerCase())) {
+      let streamerName = channel.toString().toLowerCase().substring(1);
+      updateNetworthMap(streamerName, -0.01);
+      insertCorpa(streamerName);
+    }
 
-  // Sub Corpa Value
-  if (sellKeywords.includes(message.toLowerCase())) {
-    let streamerName = channel.toString().toLowerCase().substring(1);
-    updateNetworthMap(streamerName, -0.01);
-    insertCorpa(streamerName);
-  }
-
-  //Check Streamer Value
-  if (message.toLowerCase().includes("!corpastock")) {
-    let clientName = new MongoClient(
-      process.env.MONGO_URL.concat(channel.toString().substring(1))
-    );
-    let channelName = channel.toString().substring(1);
-    getCorpa(channelName).then((corpaCost) => {
-      twitchClient.say(
-        channel,
-        `@${tags.username} $${channelName.toUpperCase()} is worth ${corpaCost
-          .toFixed(2)
-          .concat(" Corpas")}`
+    //Check Streamer Value
+    if (message.toLowerCase().includes("!corpastock")) {
+      let clientName = new MongoClient(
+        process.env.MONGO_URL.concat(channel.toString().substring(1))
       );
-    });
-  }
+      let channelName = channel.toString().substring(1);
+      getCorpa(channelName).then((corpaCost) => {
+        twitchClient.say(
+          channel,
+          `@${tags.username} $${channelName.toUpperCase()} is worth ${corpaCost
+            .toFixed(2)
+            .concat(" Corpas")}`
+        );
+      });
+    }
 
-  // Listen for new user wanting to be added
-  if (
-    channel.toString().substring(1) === "corpastocks" &&
-    message.toLowerCase() === "!addme"
-  ) {
-    getFollowerAmount(tags.username);
-    twitchClient.say(channel, "you wanna be added?");
-  }
-});
+    // Listen for new user wanting to be added
+    if (
+      channel.toString().substring(1) === "corpastocks" &&
+      message.toLowerCase() === "!addme"
+    ) {
+      let followers = getFollowerAmount(tags["user-id"], tags.username);
+      if (followers < 50) {
+        twitchClient.say(
+          channel,
+          `@${tags.username} You must have at least 50 followers or are too new to be added. Come back later!`
+        );
+      } else {
+        addNewStreamer(tags.username, followers);
+      }
+    }
+  });
+}
 
-// TODO - Maybe not needed. Might want to get
-// followers via webpage to push info into database -> tumer to
+// Check if streamer has already been added
+async function streamerExists(channel) {
+  for (let x = 0; x < numberOfStreamers; x++) {
+    if (channels2Watch.get(x) === channel.toLowerCase()) return true;
+  }
+  return false;
+}
 // update hashmap and join commands here
-function getFollowerAmount(twitchUsername) {
+function getFollowerAmount(twitchID, twitchUsername) {
+  let followerCount = 0;
+  let endURL = twitchID.concat("-").concat(twitchUsername);
   request(
-    "https://twitchtracker.com/".concat(twitchClient),
+    "https://www.twitchmetrics.net/c/".concat(endURL),
     (error, response, html) => {
-      console.log(html);
+      let htmlResponses = [];
       if (!error && response.statusCode == 200) {
-        console.log(html);
+        const $ = cheerio.load(html);
+        $(".col-6").each((index, element) => {
+          let columnArray = $(element).first().text();
+          htmlResponses[index] = columnArray;
+        });
+        followerCount = parseInt(htmlResponses[11]);
+      } else {
+        console.log("HTML Error Code: ".concat(response.statusCode));
+        followerCount = 0;
       }
     }
   );
-}
 
+  return followerCount;
+}
+// Locally update networth map
 function updateNetworthMap(channel, amount) {
   netWorthMap.set(channel, netWorthMap.get(channel) + amount);
 }
@@ -171,32 +249,8 @@ async function initializeHashMap() {
 }
 
 module.exports = async function () {
-  await setNetworth("italiandogs");
-  await setNetworth("mizkif");
   await getClientAmount();
   await initializeHashMap();
   await joinChannels();
-
-  // console.log(netWorthMap.get("italiandogs"));
-
-  // //____________________________________________________________
-  // //initial IPO of streamer (keep commented out unless needed)
-  // //Networth formula: in env file
-
-  // var stremerToAdd = "test";
-  // var ipoAmount = 69420;
-
-  // netWorthMap.set(stremerToAdd, ipoAmount);
-  // await initialIPO(
-  //   new MongoClient(process.env.MONGO_URL.concat(stremerToAdd)),
-  //   stremerToAdd,
-  //   {
-  //     channelId: stremerToAdd,
-  //     stockName: "$".concat(stremerToAdd),
-  //     stockPrice: ipoAmount,
-  //     //timestamp: new Date().toISOString(),
-  //     timestamp: Math.round(Date.now() / 1000),
-  //   }
-  // );
-  // //___________________________________________________________
+  twitchChat();
 };
