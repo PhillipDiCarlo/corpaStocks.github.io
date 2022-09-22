@@ -2,6 +2,14 @@
 <html lang="en">
   <head>
     <link rel="stylesheet" href="client/index.css"></link>
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#6441a5">
+    <meta name="msapplication-TileColor" content="#6441a5">
+    <meta name="theme-color" content="#6441a5">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.core.min.js" integrity="sha512-+wqa4/aOL4vwhL637A4p+6epqhUHDqpEfYJa1+PlzlMf908CSOb3xtIeKwZWh5Q0Q/R2nYUKxH4vvcQg+k8KKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
@@ -9,6 +17,15 @@
   </head>
   
   <body >
+      <div id="button_area"> <header>
+        <p>Want to be added to the Corpa Market?</p>
+        <a href="https://api.twitch.tv/kraken/oauth2/authorize?response_type=code&client_id=tpjtlysgipirxbidf3ca72tsg7aiz1&redirect_uri=https://corpastocks.italiandogs.net/&scope=user_read"><button type="button" class="btn btn-twitch">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="btn btn-twitch" viewBox="0 0 16 16">
+          <path d="M3.857 0 1 2.857v10.286h3.429V16l2.857-2.857H9.57L14.714 8V0H3.857zm9.714 7.429-2.285 2.285H9l-2 2v-2H4.429V1.143h9.142v6.286z"/>
+          <path d="M11.857 3.143h-1.143V6.57h1.143V3.143zm-3.143 0H7.571V6.57h1.143V3.143z"/>
+        </svg> Login to Twitch</button></a>
+      </header></div>
+
       <div id="root"><header>
         <h1>CORPA STOCK</h1>
         <p>Created by: Italiandogs</p>
