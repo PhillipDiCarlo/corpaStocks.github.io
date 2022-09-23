@@ -19,10 +19,13 @@ let databaseName = "streamerStocks";
 let netWorthMap = new HashMap();
 
 //initial set of streamers worth if collection exists
-async function setNetworth(streamer) {
-  await getCorpa(streamer).then((tempIPO) => {
-    netWorthMap.set(streamer, tempIPO);
-  });
+async function setNetworth() {
+  for (let x = 0; x < numberOfStreamers; x++) {
+    let streamer = channels2Watch.get(x);
+    await getCorpa(streamer).then((tempIPO) => {
+      netWorthMap.set(streamer, tempIPO);
+    });
+  }
 }
 
 // Add entry into corresponding database collection
@@ -130,14 +133,20 @@ async function twitchChat() {
     if (self) return;
 
     // Add Corpa Value
-    if (buyKeywords.includes(message.toLowerCase())) {
+    if (
+      message.toLowerCase().includes(buyKeywords[0]) ||
+      message.toLowerCase().includes(buyKeywords[1])
+    ) {
       let streamerName = channel.toString().toLowerCase().substring(1);
       updateNetworthMap(streamerName, 0.01);
       insertCorpa(streamerName);
     }
 
     // Sub Corpa Value
-    if (sellKeywords.includes(message.toLowerCase())) {
+    if (
+      message.toLowerCase().includes(sellKeywords[0]) ||
+      message.toLowerCase().includes(sellKeywords[1])
+    ) {
       let streamerName = channel.toString().toLowerCase().substring(1);
       updateNetworthMap(streamerName, -0.01);
       insertCorpa(streamerName);
@@ -251,6 +260,7 @@ async function initializeHashMap() {
 module.exports = async function () {
   await getClientAmount();
   await initializeHashMap();
+  await setNetworth();
   await joinChannels();
   twitchChat();
 };
