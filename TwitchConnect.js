@@ -194,10 +194,11 @@ async function streamerExists(channel) {
   return false;
 }
 // update hashmap and join commands here
-function getFollowerAmount(twitchID, twitchUsername) {
+async function getFollowerAmount(twitchID, twitchUsername) {
   let followerCount = 0;
   let endURL = twitchID.concat("-").concat(twitchUsername);
-  request(
+
+  await request(
     "https://www.twitchmetrics.net/c/".concat(endURL),
     (error, response, html) => {
       let htmlResponses = [];
